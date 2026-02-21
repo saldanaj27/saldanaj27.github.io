@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Javier Saldana</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #222;
+            --text: #e8e8e8;
+            --muted: #888;
+            --accent: #6366f1;
+            --accent-dim: #4f46e5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+        }
+
+        header {
+            margin-bottom: 56px;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .links a:hover { color: #818cf8; }
+
+        section {
+            margin-bottom: 48px;
+        }
+
+        h2 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        p { color: #bbb; margin-bottom: 12px; }
+        p:last-child { margin-bottom: 0; }
+
+        .project {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .project:hover { border-color: #333; }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .project h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .project h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .project h3 a:hover { color: var(--accent); }
+
+        .tag {
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .project p {
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+
+        .experience-item {
+            margin-bottom: 20px;
+        }
+
+        .experience-item:last-child { margin-bottom: 0; }
+
+        .role {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .company {
+            color: var(--accent);
+        }
+
+        .period {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill {
+            font-size: 0.85rem;
+            color: #bbb;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+
+        .education .degree {
+            font-weight: 600;
+        }
+
+        .education .school {
+            color: var(--accent);
+        }
+
+        .education .minor {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .experience-details {
+            list-style: none;
+            margin-top: 10px;
+            padding: 0;
+        }
+
+        .experience-details li {
+            font-size: 0.9rem;
+            color: #999;
+            padding-left: 16px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+
+        .experience-details li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .skill-category {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .skill-category:first-child {
+            margin-top: 0;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 48px 18px 40px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Javier Saldana</h1>
+            <div class="tagline">Software Engineer &middot; Los Angeles &rarr; New York</div>
+            <div class="links">
+                <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a>
+                <a href="https://github.com/saldanaj27">GitHub</a>
+            </div>
+        </header>
+
+        <section>
+            <h2>About</h2>
+            <p>Software engineer with a B.S. in Computer Science and minors in Data Science and Mathematics from NYU. Born and raised in Los Angeles, now based in New York. I build platform infrastructure, distributed systems, and full-stack applications. Fluent in English and Spanish.</p>
+        </section>
+
+        <section>
+            <h2>Experience</h2>
+            <div class="experience-item">
+                <div class="role">Software Engineer II <span class="company">@ FICO</span></div>
+                <div class="period">IAM Team &middot; July 2022 &ndash; Present &middot; New York, NY</div>
+            </div>
+            <div class="experience-item">
+                <div class="role">Software Engineering Intern <span class="company">@ FICO</span></div>
+                <div class="period">June 2021 &ndash; August 2021 &middot; Los Angeles, CA</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Projects</h2>
+            <div class="project">
+                <div class="project-header">
+                    <h3><a href="https://github.com/saldanaj27/StatStack">StatStack</a></h3>
+                    <span class="tag">Django &middot; React &middot; Redis</span>
+                </div>
+                <p>Full-stack fantasy analytics platform aggregating 100K+ player-game records across 6 seasons, with 20+ REST endpoints powering rankings, head-to-head comparisons, and defensive matchup analysis. ML prediction pipeline using an ensemble of 3 models trained on 44 engineered features per game. Redis caching with endpoint-specific TTLs and a parallel CI pipeline with automated deployment.</p>
+            </div>
+            <div class="project">
+                <div class="project-header">
+                    <h3><a href="https://github.com/saldanaj27/compass">Compass</a></h3>
+                    <span class="tag">Claude API &middot; SQLite &middot; Click</span>
+                </div>
+                <p>CLI-based AI accountability agent that conducts multi-turn goal discovery to understand user skills, constraints, and availability before generating personalized, deadline-aware tasks. Hybrid two-layer context system combining a persistent global user profile with goal-specific context in SQLite for cross-session personalization.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Education</h2>
+            <div class="education">
+                <div class="degree">B.S. Computer Science</div>
+                <div class="school">New York University</div>
+                <div class="minor">Minor in Data Science and Mathematics</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Skills</h2>
+            <h3 class="skill-category">Languages</h3>
+            <div class="skills-grid">
+                <span class="skill">Java</span>
+                <span class="skill">Python</span>
+                <span class="skill">JavaScript</span>
+                <span class="skill">SQL</span>
+            </div>
+            <h3 class="skill-category">Frameworks & Libraries</h3>
+            <div class="skills-grid">
+                <span class="skill">Spring Boot</span>
+                <span class="skill">Django</span>
+                <span class="skill">React</span>
+                <span class="skill">Node.js</span>
+                <span class="skill">gRPC</span>
+                <span class="skill">scikit-learn</span>
+            </div>
+            <h3 class="skill-category">Infrastructure & DevOps</h3>
+            <div class="skills-grid">
+                <span class="skill">Kubernetes</span>
+                <span class="skill">Docker</span>
+                <span class="skill">Helm</span>
+                <span class="skill">Istio</span>
+                <span class="skill">AWS</span>
+                <span class="skill">GitHub Actions</span>
+                <span class="skill">Argo</span>
+            </div>
+            <h3 class="skill-category">Data & Observability</h3>
+            <div class="skills-grid">
+                <span class="skill">PostgreSQL</span>
+                <span class="skill">Pulsar</span>
+                <span class="skill">Kafka</span>
+                <span class="skill">Redis</span>
+                <span class="skill">Grafana</span>
+                <span class="skill">Splunk</span>
+                <span class="skill">OpenTelemetry</span>
+            </div>
+        </section>
+
+        <footer>
+            Javier Saldana &copy; 2026
+        </footer>
+    </div>
+</body>
+</html>

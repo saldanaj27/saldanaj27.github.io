@@ -1,0 +1,213 @@
+---
+// Hand-authored, derived from private career notes and scrubbed per the site plan.
+// Facts come from the public resume; do not paste raw source material here.
+import WorkPage from '../../layouts/WorkPage.astro';
+import Tradeoff from '../../components/Tradeoff.astro';
+---
+
+<WorkPage
+  title="Kubernetes RBAC Operator"
+  oneLiner="A custom Kubernetes operator that turned authorization provisioning from a two-hour manual process into declarative configuration that maintains itself."
+  role="Sole designer and implementer"
+  timeframe="FICO Platform"
+  stack={['Java Operator SDK', 'Kubernetes', 'gRPC']}
+  metrics={[
+    { value: '2h → ~8m', label: 'provisioning time' },
+    { value: '20+', label: 'services provisioned' },
+    { value: '4', label: 'custom resource types' },
+    { value: '5 min', label: 'reconcile interval' },
+  ]}
+  description="A custom Kubernetes operator (Java Operator SDK) that reconciles declarative RBAC configuration, cutting provisioning from 2 hours to about 8 minutes."
+>
+  <h2>The problem</h2>
+  <p>
+    Every service on the platform needs authorization data before it can serve its
+    first request: which roles exist, which permissions attach to which resources,
+    which groups grant which roles. Defining that data was manual. Engineers drove
+    a gRPC authoring API by hand, call by call, for every role, permission, and
+    mapping their service needed. A typical change took about two hours, and a
+    mistake did not show up until runtime, as a service denying legitimate access
+    or granting access it should not have.
+  </p>
+  <p>
+    Then the platform moved to a cell-based architecture, where teams deploy into
+    multiple isolated environments. Authorization data had to be defined
+    separately in every cell a team deployed to, so the manual work stopped
+    growing linearly and started growing per team, per service, per cell. The
+    provisioning process that was merely tedious for one environment became a
+    real bottleneck for onboarding.
+  </p>
+
+  <h2>What I built</h2>
+  <p>
+    I designed and built the operator end to end: the custom resource schemas, the
+    reconcile strategy, and the integration with the authoring API. For scope
+    honesty, the authoring API itself and the platform's wider policy
+    distribution architecture were team-level designs that I worked within; the
+    operator is the piece where every design decision was mine.
+  </p>
+  <p>
+    The operator defines four custom resource types, each covering one area of
+    authorization data: capabilities (a service that owns protectable resources),
+    custom roles, resource-to-permission mappings, and role-to-group bootstrap
+    mappings. Teams fill in templated YAML, check it into git, and deploy the
+    resources alongside their services. From that point the operator owns keeping
+    reality in sync with what the YAML declares.
+  </p>
+
+  <h2>How it works</h2>
+  <p>
+    An operator is a control loop, not a script. It never runs once and exits; it
+    continuously compares the state teams have declared against the state that
+    actually exists, and corrects the difference. I have written a longer
+    explainer on the pattern (<a href="/writing/what-a-kubernetes-operator-actually-is/"
+    >what a Kubernetes operator actually is</a>), but the short version is a
+    thermostat: you declare the temperature you want, and the system continuously
+    works out how to get there.
+  </p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 740 320" role="img" aria-label="Diagram: YAML custom resources flow from git through the Kubernetes API server to the operator, which reconciles them into the policy authoring API and authorization store">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.25">
+          <rect x="20" y="50" width="160" height="64" rx="4" />
+          <rect x="250" y="50" width="170" height="64" rx="4" />
+          <rect x="490" y="36" width="230" height="92" rx="4" />
+          <rect x="490" y="210" width="230" height="60" rx="4" />
+          <rect x="200" y="210" width="200" height="60" rx="4" />
+        </g>
+        <g fill="currentColor" font-size="13" text-anchor="middle">
+          <text x="100" y="77">RBAC config as YAML</text>
+          <text x="100" y="96" opacity="0.6">4 CRD types, in git</text>
+          <text x="335" y="77">Kubernetes API server</text>
+          <text x="335" y="96" opacity="0.6">admission validation</text>
+          <text x="605" y="62">Operator</text>
+          <text x="605" y="84" opacity="0.75">observe → diff → act</text>
+          <text x="605" y="106" opacity="0.6">on change + every 5 min</text>
+          <text x="605" y="235">Policy authoring API</text>
+          <text x="605" y="254" opacity="0.6">gRPC, writes only on diff</text>
+          <text x="300" y="235">Authorization store</text>
+          <text x="300" y="254" opacity="0.6">source for policy bundles</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.25" fill="none" marker-end="url(#arrow)">
+          <line x1="180" y1="82" x2="244" y2="82" />
+          <line x1="420" y1="82" x2="484" y2="82" />
+          <line x1="605" y1="128" x2="605" y2="204" />
+          <line x1="490" y1="240" x2="406" y2="240" />
+        </g>
+        <g fill="currentColor" font-size="12" opacity="0.6">
+          <text x="187" y="72">apply</text>
+          <text x="428" y="72">watch</text>
+          <text x="615" y="170">reconcile</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      Declared state flows left to right; the operator loop keeps the store in
+      sync with it.
+    </figcaption>
+  </figure>
+
+  <p>
+    The flow: a team applies its custom resources, and admission webhooks validate
+    the group-to-role, permission-to-role, and permission-to-resource mappings at
+    deploy time, so a malformed configuration is rejected in seconds rather than
+    discovered at runtime. The operator watches those resources and also resyncs
+    on a five-minute interval. On each reconcile it reads what the resource
+    declares, compares it to what the authoring API reports as live, and writes
+    only when something actually differs. Status conditions on each resource
+    surface the outcome, so a team can check provisioning state with
+    <code>kubectl</code> instead of filing a ticket. I also added throttling so a
+    burst of changes does not hammer the authoring API.
+  </p>
+  <p>
+    The interval matters as much as the watch. Because reconciliation is
+    level-triggered rather than edge-triggered, the operator picks up resources
+    created while it was down, retries transient failures on the next cycle, and
+    corrects drift: if the live data no longer matches what a resource declares,
+    the next reconcile puts it back. That is what makes the system self-healing
+    rather than merely automated.
+  </p>
+
+  <h2>Trade-offs</h2>
+
+  <Tradeoff decision="Declarative custom resources over the imperative authoring API as the provisioning path">
+    <span slot="bought">
+      GitOps for authorization: config is version-controlled, reviewable, and
+      rolled back like code. Schema validation happens at deploy time, and one
+      YAML template serves every cell a team deploys to.
+    </span>
+    <span slot="cost">
+      State now has two entry points. Data declared through a custom resource
+      self-heals, but data created directly through the API with no owning
+      resource is invisible to the operator, and nothing reconciles it. Drift
+      detection for that ungoverned data is the first thing I would add.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="A continuous reconcile loop over one-shot provisioning scripts">
+    <span slot="bought">
+      Self-healing by construction: drift correction, crash recovery, and retry
+      of transient failures all fall out of the loop for free, with no special
+      error-handling paths.
+    </span>
+    <span slot="cost">
+      Convergence is eventual, not immediate. An out-of-band change can persist
+      for up to one reconcile interval before it is corrected, and every cycle
+      spends reads against the authoring API even when nothing changed.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Validation at admission time over validation inside the reconcile loop">
+    <span slot="bought">
+      Bad configuration is rejected before it is ever stored. The team gets
+      feedback at <code>kubectl apply</code>, in seconds, with a message naming
+      the invalid mapping.
+    </span>
+    <span slot="cost">
+      The webhook sits on the API server's request path for these resource
+      types, so it has to stay fast and highly available; a slow validator would
+      degrade every deploy that touches authorization config.
+    </span>
+  </Tradeoff>
+
+  <h2>Results</h2>
+  <ul>
+    <li>
+      RBAC provisioning went from about 2 hours of manual API work to roughly 8
+      minutes of writing YAML, across 20+ microservices.
+    </li>
+    <li>
+      Misconfigurations are caught at deploy time by schema validation and
+      admission webhooks, before they can affect a running service.
+    </li>
+    <li>
+      Teams onboard once per use case instead of once per cell: the same
+      templated resources deploy to every environment, and the operator applies
+      and maintains them everywhere.
+    </li>
+  </ul>
+
+  <h2>What I'd do differently</h2>
+  <p>
+    The operator only governs data that has an owning custom resource, and I
+    would close that gap first: a detection pass that flags store data with no
+    corresponding resource, so the declarative path is the only unaudited-change
+    path. I would also instrument the loop itself from day one, reconcile
+    latency, writes per cycle, and time-to-convergence after a change, because a
+    control loop you cannot observe is a control loop you cannot debug.
+  </p>
+
+  <p class="meta">
+    Related writing:
+    <a href="/writing/what-a-kubernetes-operator-actually-is/"
+      >What a Kubernetes operator actually is</a
+    > ·
+    <a href="/work/authorization-platform/">the authorization platform this provisions</a>
+  </p>
+</WorkPage>

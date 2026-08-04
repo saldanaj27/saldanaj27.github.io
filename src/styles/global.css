@@ -1,0 +1,364 @@
+/* ---------------------------------------------------------------------------
+   Design system — "technical journal" register.
+   Serif carries prose; mono carries structure (labels, metrics, tags, code).
+   Tokens per website/PLAN.md §6. Accent budget: links, hover underline,
+   metric numerals, focus ring. Nothing else.
+--------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('/fonts/source-serif-4-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/source-serif-4-italic-latin.woff2') format('woff2');
+}
+
+:root {
+  --font-prose: 'Source Serif 4', Charter, 'Iowan Old Style', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --size-body: 1.1875rem;
+  --size-small: 0.9375rem;
+  --size-label: 0.8125rem;
+  --lh-prose: 1.65;
+  --lh-tight: 1.25;
+  --measure: 68ch;
+  --measure-wide: 90ch;
+
+  --bg: #faf9f7;
+  --bg-subtle: #f2f0ec;
+  --text: #1a1917;
+  --text-muted: #6b6862;
+  --rule: #ddd9d2;
+  --accent: #a8541f;
+  --accent-bg: #f5ebe1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16151a;
+    --bg-subtle: #1e1d23;
+    --text: #e8e6e1;
+    --text-muted: #96938c;
+    --rule: #33313a;
+    --accent: #e0965a;
+    --accent-bg: #2a2119;
+  }
+}
+
+/* Explicit toggle wins over the media query in both directions. */
+:root[data-theme='light'] {
+  --bg: #faf9f7;
+  --bg-subtle: #f2f0ec;
+  --text: #1a1917;
+  --text-muted: #6b6862;
+  --rule: #ddd9d2;
+  --accent: #a8541f;
+  --accent-bg: #f5ebe1;
+}
+:root[data-theme='dark'] {
+  --bg: #16151a;
+  --bg-subtle: #1e1d23;
+  --text: #e8e6e1;
+  --text-muted: #96938c;
+  --rule: #33313a;
+  --accent: #e0965a;
+  --accent-bg: #2a2119;
+}
+
+/* Shiki dual themes follow the same switching rules. */
+@media (prefers-color-scheme: dark) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: transparent !important;
+  }
+}
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: transparent !important;
+}
+:root[data-theme='light'] .astro-code,
+:root[data-theme='light'] .astro-code span {
+  color: var(--shiki-light) !important;
+  background-color: transparent !important;
+}
+
+/* ------------------------------------------------------------------ reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-prose);
+  font-size: var(--size-body);
+  line-height: var(--lh-prose);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* -------------------------------------------------------------- structure */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--measure-wide) + 3rem);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+main {
+  flex: 1;
+  padding: 2.5rem 0 4rem;
+}
+
+main > .wrap > * + *,
+article > * + * {
+  margin-top: 1.25rem;
+}
+
+/* Prose stays at reading measure; structural elements may break out. */
+p,
+ul,
+ol,
+dl,
+blockquote,
+h1,
+h2,
+h3,
+h4 {
+  max-width: var(--measure);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: var(--lh-tight);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.25rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+h3 {
+  font-size: 1.1875rem;
+  margin-top: 2rem;
+}
+
+ul,
+ol {
+  padding-left: 1.5rem;
+}
+
+li + li {
+  margin-top: 0.5rem;
+}
+
+blockquote {
+  border-left: 2px solid var(--rule);
+  padding-left: 1.25rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2.5rem 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ links */
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.15em;
+  transition: text-decoration-color 120ms ease;
+}
+
+a:hover {
+  text-decoration-color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------- mono / structure */
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.meta a {
+  color: var(--text-muted);
+}
+
+.meta a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.tags {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------------------- code */
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+}
+
+p code,
+li code,
+dd code {
+  background: var(--bg-subtle);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+pre {
+  max-width: var(--measure-wide);
+  background: var(--bg-subtle) !important;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin-top: 1.25rem;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.9375rem;
+}
+
+/* ---------------------------------------------------------------- figures */
+
+figure {
+  max-width: var(--measure-wide);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.diagram {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1.5rem 1rem;
+  background: var(--bg-subtle);
+}
+
+.diagram svg {
+  display: block;
+  margin: 0 auto;
+  min-width: 560px;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
+/* ----------------------------------------------------------------- tables */
+
+.table-scroll {
+  max-width: var(--measure-wide);
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: var(--size-small);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 1.25rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 400;
+}

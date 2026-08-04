@@ -1,0 +1,220 @@
+---
+// Hand-authored, derived from private career notes and scrubbed per the site plan.
+// Facts come from the public resume; do not paste raw source material here.
+import WorkPage from '../../layouts/WorkPage.astro';
+import Tradeoff from '../../components/Tradeoff.astro';
+---
+
+<WorkPage
+  title="Authorization Platform"
+  oneLiner="An OPA-based policy distribution system that makes authorization a sub-millisecond local decision in every service, with no central auth server."
+  role="Operator: sole designer · bundle pipeline: contributor · client library: builder"
+  timeframe="FICO Platform"
+  stack={['OPA', 'Rego', 'Java', 'gRPC', 'Pulsar']}
+  metrics={[
+    { value: '30+', label: 'consuming services' },
+    { value: 'sub-ms', label: 'policy evaluation' },
+    { value: '10–20s', label: 'bundle poll interval' },
+    { value: '1M+', label: 'daily auth requests' },
+  ]}
+  description="A decentralized OPA bundle distribution system delivering sub-millisecond authorization to 30+ microservices on the FICO Platform."
+>
+  <h2>The problem</h2>
+  <p>
+    Every microservice on the platform constantly has to answer one question: is
+    this user allowed to do this action on this thing? The obvious architecture
+    is a central authorization server that every service calls on every request.
+    We deliberately did not build that, for two reasons. It is slow, because it
+    adds a network round-trip to every single request. And it is a single point
+    of failure: if the central server degrades, nothing on the platform can
+    authorize anyone, and the whole platform effectively stops. For a platform
+    serving enterprise financial institutions under strict uptime SLAs, that
+    blast radius was unacceptable.
+  </p>
+  <p>
+    The useful mental model is a guest list photocopied to every door. Instead of
+    every bouncer radioing a central office to ask whether someone is on the
+    list, each door holds its own current copy of the list and the rules, and
+    refreshes it every ten to twenty seconds. Decisions are instant and local.
+    The honest cost: if you remove someone from the master list, the doors do
+    not know until their next refresh. That staleness window is the central
+    trade-off of the whole design, and it is examined below rather than hidden.
+  </p>
+
+  <h2>What I built</h2>
+  <p>
+    This was a team system, and the scope split matters. The decentralized
+    bundle architecture was a platform-level design I worked within. My hands
+    were on three parts: I designed and built the
+    <a href="/work/kubernetes-rbac-operator/">Kubernetes operator</a> that
+    provisions authorization data declaratively (it gets its own page), I
+    contributed to the bundle build pipeline that packages policy and data into
+    distributable artifacts, and I built the shared Java client library that
+    services include to enforce authorization, including its dual-sidecar
+    bootstrap logic. The parts I did not build, like the policy authoring API, I
+    worked with closely and understand deeply, but I will not claim I wrote
+    their internals.
+  </p>
+
+  <h2>How it works</h2>
+  <p>
+    Authorization data (roles, permissions, groups, and their relationships) is
+    authored through a central gRPC API and stored relationally. From there, the
+    system is a pipeline: changes publish an event to a message bus, a build
+    step wakes up, queries the current data, pulls the Rego policy logic, and
+    packages both into a compressed OPA bundle pushed to object storage. Every
+    service pod runs an OPA sidecar that polls for new bundles every ten to
+    twenty seconds, using ETags so an unchanged bundle costs a "not modified"
+    response instead of a re-download.
+  </p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 740 330" role="img" aria-label="Diagram: policy changes flow from the authoring API through an event bus to a bundle builder and object store; OPA sidecars in each service pod poll for bundles and answer authorization queries locally">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.25">
+          <rect x="20" y="30" width="170" height="58" rx="4" />
+          <rect x="20" y="140" width="170" height="52" rx="4" />
+          <rect x="250" y="140" width="180" height="58" rx="4" />
+          <rect x="490" y="140" width="160" height="52" rx="4" />
+          <rect x="440" y="240" width="280" height="70" rx="4" />
+          <g stroke-dasharray="4 3">
+            <rect x="430" y="230" width="300" height="90" rx="6" opacity="0" />
+          </g>
+        </g>
+        <g fill="currentColor" font-size="13" text-anchor="middle">
+          <text x="105" y="55">Authoring API</text>
+          <text x="105" y="74" opacity="0.6">roles · permissions · groups</text>
+          <text x="105" y="171" opacity="0.9">Event bus</text>
+          <text x="340" y="164">Bundle builder</text>
+          <text x="340" y="184" opacity="0.6">data + Rego → bundle</text>
+          <text x="570" y="166">Object store</text>
+          <text x="580" y="265">Service pod</text>
+          <text x="580" y="286" opacity="0.75">app ⇄ OPA sidecar</text>
+          <text x="580" y="303" opacity="0.6">local decision, sub-ms</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.25" fill="none" marker-end="url(#arrow2)">
+          <line x1="105" y1="88" x2="105" y2="134" />
+          <line x1="190" y1="166" x2="244" y2="166" />
+          <line x1="430" y1="166" x2="484" y2="166" />
+          <line x1="580" y1="234" x2="580" y2="198" />
+        </g>
+        <g fill="currentColor" font-size="12" opacity="0.6">
+          <text x="115" y="115">change event</text>
+          <text x="196" y="156">build</text>
+          <text x="437" y="156">push</text>
+          <text x="590" y="222">poll every 10–20s (ETag)</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      The write path builds and publishes bundles; the read path is a local
+      sidecar that already holds the answer.
+    </figcaption>
+  </figure>
+
+  <p>
+    On a live request, the calling user's signed JWT carries their groups. The
+    service asks its local sidecar, which walks groups to roles to permissions
+    to the specific resource entirely in memory and returns allow or deny in
+    under a millisecond. No network call, no dependency on any central service
+    being up. If every central component went down at once, services would keep
+    authorizing correctly with the bundles they already hold.
+  </p>
+
+  <h2>Trade-offs</h2>
+
+  <Tradeoff decision="Decentralized policy bundles over a central authorization server">
+    <span slot="bought">
+      Sub-millisecond local evaluation with no per-request network hop, and
+      survival of control-plane outages: sidecars keep serving decisions from
+      their cached bundles.
+    </span>
+    <span slot="cost">
+      Eventual consistency. A revoked permission takes one build-and-poll cycle
+      (seconds to a couple of minutes) to propagate. We judged that acceptable
+      because RBAC changes are planned administrative actions, and for a genuine
+      emergency (a compromised credential) short JWT expiry is the real kill
+      switch, not bundle propagation.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Event-driven bundle builds over building inline on each write">
+    <span slot="bought">
+      Writes stay fast, because a permission change never blocks on the slow
+      work of querying everything and packaging a bundle, and the message bus
+      provides retries and at-least-once delivery for free.
+    </span>
+    <span slot="cost">
+      More moving infrastructure between a write and its effect, and the
+      freshest bundle is always one asynchronous build behind the latest write,
+      which widens the consistency window the previous trade-off already
+      accepts.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Generating two bundle formats simultaneously over a big-bang format migration">
+    <span slot="bought">
+      Every consumer migrates from the old flat format to the newer multi-tenant
+      format on its own schedule, with nothing breaking on cutover day.
+    </span>
+    <span slot="cost">
+      Every change builds two bundles and the team maintains two policy files,
+      doubling the surface area that has to stay correct until the last consumer
+      migrates.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="A dual-sidecar bootstrap over blocking startup until the first bundle loads">
+    <span slot="bought">
+      The authorization system can authorize its own cold start. A second
+      sidecar with a known-good dataset baked into its image answers until the
+      primary loads its first live bundle, which took cold-start authorization
+      failures to zero.
+    </span>
+    <span slot="cost">
+      Availability over strict consistency during the startup window: the
+      baked-in snapshot can be slightly staler than live data for the first few
+      seconds. The full reasoning is in
+      <a href="/writing/opa-dual-sidecar-bootstrap/">its own write-up</a>.
+    </span>
+  </Tradeoff>
+
+  <h2>Results</h2>
+  <ul>
+    <li>
+      Adopted as the authorization standard across the platform: any service
+      adds the shared client library and gets policy-based access control with
+      no central dependency.
+    </li>
+    <li>
+      Sub-millisecond policy evaluation on the authorization path of a platform
+      processing 1M+ daily authenticated requests at a 99.98% uptime SLA.
+    </li>
+    <li>
+      30+ microservices consume the client library; provisioning for 20+ of
+      them runs through the declarative operator.
+    </li>
+  </ul>
+
+  <h2>What I'd do differently</h2>
+  <p>
+    I would stand up a policy test harness on day one. The Rego policies are the
+    component on the critical path of every single request, and in any system
+    the code that makes every allow-or-deny decision deserves the deepest test
+    investment, before any of the surrounding plumbing. I would also invest
+    earlier in measuring end-to-end propagation latency, from write to sidecar,
+    because the eventual-consistency window is the design's one honest weakness
+    and you should know its real size, not its theoretical one.
+  </p>
+
+  <p class="meta">
+    Related:
+    <a href="/work/kubernetes-rbac-operator/">Kubernetes RBAC Operator</a> ·
+    <a href="/writing/opa-dual-sidecar-bootstrap/">The bootstrap problem in OPA authorization</a>
+  </p>
+</WorkPage>

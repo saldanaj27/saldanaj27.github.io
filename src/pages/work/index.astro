@@ -1,0 +1,63 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { work } from '../../data/work';
+---
+
+<Base
+  title="Work · Javier Saldana"
+  description="Professional platform-infrastructure work: Kubernetes operators, OPA authorization, authentication services, and AI-assisted developer tooling."
+>
+  <p class="label">Work</p>
+  <h1>Professional work</h1>
+  <p>
+    Four systems, ordered by depth rather than chronology. All of them are shared
+    infrastructure at FICO: primitives other engineering teams build on, not
+    product features. Each page states what I built personally versus what the
+    team built, and walks through the trade-offs behind the design.
+  </p>
+
+  <section class="cards" aria-label="Projects">
+    {
+      work.map((w) => (
+        <ProjectCard
+          href={`/work/${w.slug}/`}
+          title={w.title}
+          description={w.description}
+          tags={w.tags}
+          metric={w.metric}
+        />
+      ))
+    }
+  </section>
+
+  <section class="uid" aria-label="UID Generation Service">
+    <h2>Also: UID Generation Service</h2>
+    <p>
+      A stateless gRPC service generating globally unique, time-ordered 128-bit
+      identifiers at 10K+ per second per pod, with no database and no coordination
+      layer. I led the core implementation. The most interesting part was
+      validation: load testing at 1M+ QPS surfaced a clock-skew edge case that
+      could have caused ID collisions under clock drift between pods, fixed with a
+      monotonic-clock fallback before the service ever reached production.
+    </p>
+    <p class="tags">java · grpc · distributed-systems · load-testing</p>
+  </section>
+
+  <style>
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .uid {
+      max-width: var(--measure);
+      margin-top: 3rem;
+      padding-top: 0.5rem;
+    }
+    .uid p {
+      margin-top: 1rem;
+    }
+  </style>
+</Base>

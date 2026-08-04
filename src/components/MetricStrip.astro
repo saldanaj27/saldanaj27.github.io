@@ -1,0 +1,52 @@
+---
+interface Props {
+  metrics: { value: string; label: string }[];
+}
+const { metrics } = Astro.props;
+---
+
+<div class="metric-strip" role="list">
+  {
+    metrics.map((m) => (
+      <div class="metric" role="listitem">
+        <span class="value">{m.value}</span>
+        <span class="label">{m.label}</span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .metric-strip {
+    max-width: var(--measure-wide);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem 1rem;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  @media (max-width: 720px) {
+    .metric-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .value {
+      font-size: 1.5rem;
+    }
+  }
+</style>

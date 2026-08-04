@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Side Projects · Javier Saldana"
+  description="Side projects: StatStack, an NFL analytics platform with an ML prediction pipeline, and Compass, a CLI accountability agent built on the Claude API."
+>
+  <p class="label">Projects</p>
+  <h1>Side projects</h1>
+  <p>
+    Side projects are where I explore what my professional work doesn't cover:
+    machine learning, LLM agents, and full-stack product work. They are
+    deliberately secondary to the <a href="/work/">professional systems</a>, but
+    each one shipped for real.
+  </p>
+
+  <section>
+    <h2>StatStack</h2>
+    <p class="meta">
+      <a href="https://github.com/saldanaj27/StatStack">github.com/saldanaj27/StatStack</a>
+      · live demo offline during the NFL offseason
+    </p>
+    <p>
+      A data-first NFL decision engine: one page per matchup with every signal
+      that matters (trends, ML predictions, player metrics, matchup context) and
+      none of the articles, hot takes, or ads that bury it everywhere else. I
+      built it to scratch a real recurring annoyance: weekly fantasy and betting
+      decisions meant piecing together data from four or five ad-heavy sites.
+    </p>
+    <p>
+      Under the hood it's a React SPA over a Django REST backend with PostgreSQL
+      and Redis, ingesting 100K+ records across 1,600+ NFL games over six
+      seasons. The prediction pipeline is a three-model scikit-learn ensemble
+      (RandomForest for winners, GradientBoosting for spreads, Ridge for totals)
+      trained on 44 engineered features per game, with database-backed model
+      versioning so feature additions were measured rather than guessed at. It
+      was my first serious Django project and my first ML project, which was
+      the point: the goal was learning the full shape of a production system,
+      from nflverse seed pipelines through query optimization (N+1 elimination,
+      database-level aggregation, per-endpoint Redis caching) to CI-gated
+      deploys with error tracking and uptime monitoring.
+    </p>
+    <p>
+      Honest framing: a substantial learning-and-building project that reached
+      production and real personal use during the 2025 NFL season, not a product
+      with traction. Parts are deliberately over-engineered for a solo project;
+      learning what production systems need was the goal.
+    </p>
+    <p class="tags">
+      python · django · react · postgresql · redis · scikit-learn · docker
+    </p>
+  </section>
+
+  <section>
+    <h2>Compass</h2>
+    <p class="meta">
+      <a href="https://github.com/saldanaj27/compass">github.com/saldanaj27/compass</a>
+    </p>
+    <p>
+      A CLI accountability agent built on the Anthropic Claude API. It runs
+      multi-turn goal-discovery conversations (up to five turns), then generates
+      schema-validated, deadline-aware tasks as structured JSON via tool use.
+      The design problem I found most interesting was memory: a two-layer
+      persistent context architecture separates a global user profile,
+      partitioned by life domain, from per-goal SQLite state, so check-ins are
+      personalized across sessions without re-asking questions. Daily check-ins
+      reference active goals and overdue tasks, with graceful rejection flows
+      (regenerate, discuss further, modify the goal) so a conversation never
+      dead-ends.
+    </p>
+    <p class="tags">python · anthropic claude api · sqlite · click</p>
+  </section>
+
+  <style>
+    section {
+      max-width: var(--measure);
+      margin-top: 3rem;
+    }
+    section p {
+      margin-top: 1rem;
+    }
+    section h2 {
+      margin-top: 0;
+    }
+  </style>
+</Base>

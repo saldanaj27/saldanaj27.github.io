@@ -1,0 +1,41 @@
+---
+import Base from './Base.astro';
+import MetricStrip from '../components/MetricStrip.astro';
+
+interface Props {
+  title: string;
+  oneLiner: string;
+  role: string;
+  timeframe: string;
+  stack: string[];
+  metrics: { value: string; label: string }[];
+  description: string;
+}
+
+const { title, oneLiner, role, timeframe, stack, metrics, description } = Astro.props;
+---
+
+<Base title={`${title} · Javier Saldana`} description={description}>
+  <article>
+    <p class="label">Work</p>
+    <h1>{title}</h1>
+    <p class="one-liner">{oneLiner}</p>
+    <p class="meta">{role} · {timeframe} · {stack.join(' · ')}</p>
+    <MetricStrip metrics={metrics} />
+    <slot />
+  </article>
+
+  <style>
+    .one-liner {
+      font-size: 1.3125rem;
+      line-height: 1.45;
+      margin-top: 1rem;
+    }
+    .label {
+      margin-bottom: 0.75rem;
+    }
+    h1 + .one-liner {
+      margin-top: 1rem;
+    }
+  </style>
+</Base>

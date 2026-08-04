@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf() || a.data.order - b.data.order
+);
+
+const readTime = (body: string) =>
+  Math.max(1, Math.round(body.split(/\s+/).length / 200));
+---
+
+<Base
+  title="Writing · Javier Saldana"
+  description="Long-form engineering write-ups on authorization infrastructure, Kubernetes operators, and distributed-systems trade-offs."
+>
+  <p class="label">Writing</p>
+  <h1>Writing</h1>
+  <p>
+    Long-form write-ups on infrastructure patterns I have built and the
+    trade-offs behind them. Few and deliberate rather than frequent.
+  </p>
+
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li>
+          <a class="post-title" href={`/writing/${post.id}/`}>
+            {post.data.title}
+          </a>
+          <p class="post-summary">{post.data.summary}</p>
+          <p class="meta">
+            {post.data.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}{' '}
+            · {readTime(post.body ?? '')} min read
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <style>
+    .posts {
+      list-style: none;
+      padding: 0;
+      margin-top: 2.5rem;
+    }
+    .posts li + li {
+      margin-top: 2.25rem;
+      padding-top: 2.25rem;
+      border-top: 1px solid var(--rule);
+    }
+    .post-title {
+      font-size: 1.3125rem;
+      font-weight: 600;
+      line-height: var(--lh-tight);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .post-title:hover {
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 0.15em;
+    }
+    .post-summary {
+      margin-top: 0.5rem;
+    }
+    .posts .meta {
+      margin-top: 0.5rem;
+    }
+  </style>
+</Base>

@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="About · Javier Saldana"
+  description="Platform-services engineer specialized in identity and authorization infrastructure. Career arc, working style, and what I'm looking for."
+>
+  <p class="label">About</p>
+  <h1>About</h1>
+
+  <p>
+    I'm a platform-services engineer specialized in identity and authorization
+    infrastructure, with distributed-systems depth. Every professional system I
+    have shipped is a shared primitive consumed by other engineering teams:
+    authentication services, authorization policy distribution, Kubernetes
+    operators with CRDs as declarative APIs, a UID generation service. I'm not a
+    product engineer; I build the layer product engineers build on.
+  </p>
+
+  <h2>Career arc</h2>
+  <p>
+    I studied computer science at NYU with minors in data science and
+    mathematics, and the quantitative foundation still shows up in how I work:
+    when I defend a design, I'd rather say "collision probability around
+    10<sup>-18</sup>" than "unlikely." I joined FICO's platform organization as
+    an intern in 2021, returned full time in 2022, and was promoted to Lead
+    Software Engineer in 2026, all on the same identity and access management
+    platform. Joining a brand-new platform initiative early meant I watched, and
+    then increasingly shaped, systems growing from first gRPC APIs into
+    infrastructure serving enterprise financial institutions under a 99.98%
+    uptime SLA.
+  </p>
+  <p>
+    The professional depth has deliberately narrowed: IAM, Kubernetes operators,
+    distributed infrastructure. The breadth comes from side projects, which I
+    use to explore what my day job doesn't cover: machine-learning pipelines in
+    <a href="/projects/">StatStack</a>, LLM agents in Compass. Work stays in
+    Java and infrastructure; side projects wander through Python, ML, and AI on
+    purpose.
+  </p>
+
+  <h2>How I work</h2>
+  <p>
+    Some patterns recur often enough across my work that I trust them as
+    descriptions rather than aspirations.
+  </p>
+  <ul>
+    <li>
+      <strong>I gravitate to zero-to-one infrastructure.</strong> Two Kubernetes
+      operators, a UID service, a feature-flag module, and two complete side
+      projects, all built from scratch. I prefer owning a service end to end
+      (design, implementation, deployment, observability, on-call) over
+      contributing features to someone else's.
+    </li>
+    <li>
+      <strong>I think in trade-offs, not solutions.</strong> Every design
+      decision names what it bought and what it cost. Stateless versus stateful,
+      eventual versus strong consistency, availability versus correctness: the
+      interesting engineering lives in what you knowingly gave up, which is why
+      every project page on this site has a trade-offs section.
+    </li>
+    <li>
+      <strong>Stateless by default.</strong> The UID service has no database,
+      the authentication facade has no database, and authorization decisions
+      run against locally cached policy. I add state only when a design forces
+      it, because state is where availability and consistency problems live.
+    </li>
+    <li>
+      <strong>I automate incident categories, not incidents.</strong> The best
+      outcome I know is making a class of failure structurally impossible: the
+      RBAC operator ended provisioning misconfigurations by making correct
+      configuration the only expressible kind.
+    </li>
+    <li>
+      <strong>I write things down.</strong> Design decisions, trade-off records,
+      honest reflections on what I'd do differently. Infrastructure work is
+      judged over years, and undocumented reasoning doesn't survive that long.
+    </li>
+  </ul>
+
+  <h2>What I'm looking for</h2>
+  <p>
+    Platform services, distributed systems, and infrastructure that other
+    engineers build on: internal developer platforms, service meshes, policy
+    engines, orchestration, AI infrastructure. I'm most useful on teams whose
+    customers are other engineering teams, and I'm deliberately open to domains
+    beyond identity. If that sounds like your team,
+    <a href="mailto:saldanaj27@gmail.com">say hello</a>.
+  </p>
+</Base>

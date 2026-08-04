@@ -1,0 +1,74 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  tags: string[];
+  metric?: string;
+  external?: boolean;
+}
+const { href, title, description, tags, metric, external = false } = Astro.props;
+---
+
+<a class="card" href={href} {...external ? { rel: 'noopener' } : {}}>
+  <div class="card-head">
+    <span class="card-title">{title}</span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </div>
+  <p class="card-desc">{description}</p>
+  <div class="card-foot">
+    <span class="tags">{tags.join(' · ')}</span>
+    {metric && <span class="metric meta">{metric}</span>}
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+    max-width: var(--measure-wide);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 120ms ease;
+  }
+  .card:hover {
+    border-color: var(--text-muted);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 1.1875rem;
+    line-height: var(--lh-tight);
+  }
+  .card:hover .card-title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 0.15em;
+  }
+  .arrow {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+  .card:hover .arrow {
+    color: var(--accent);
+  }
+  .card-desc {
+    margin-top: 0.5rem;
+    font-size: 1.0625rem;
+    color: var(--text);
+  }
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.85rem;
+  }
+</style>

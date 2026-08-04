@@ -1,0 +1,179 @@
+---
+// Hand-authored, derived from private career notes and scrubbed per the site plan.
+// Facts come from the public resume; do not paste raw source material here.
+import WorkPage from '../../layouts/WorkPage.astro';
+import Tradeoff from '../../components/Tradeoff.astro';
+---
+
+<WorkPage
+  title="AI-Assisted SDLC Workflow"
+  oneLiner="A multi-agent pipeline that takes a Jira ticket to a reviewable pull request inside a production CI/CD gate, with the human keeping final authority."
+  role="Designer and builder"
+  timeframe="FICO Platform · 2026"
+  stack={['Multi-agent orchestration', 'CI/CD', 'Jira', 'GitHub']}
+  metrics={[
+    { value: '2–3', label: 'tickets per week' },
+    { value: '9', label: 'services covered' },
+    { value: '2', label: 'review layers pre-human' },
+    { value: '0', label: 'auto-merges, by design' },
+  ]}
+  description="A multi-agent AI workflow deployed into FICO's internal CI/CD pipeline, taking Jira tickets to reviewable pull requests."
+>
+  <h2>The problem</h2>
+  <p>
+    A typical platform ticket demands far more context than code. Before writing
+    a line, an engineer has to understand the existing codebase patterns, find
+    the relevant config files, Helm charts, and test suites, write the right
+    kind of test coverage, and follow conventions that are mostly undocumented.
+    On an IAM platform of nine services, each with slightly different
+    conventions, that context load is the real barrier: engineers new to the
+    platform could not contribute confidently until they had absorbed most of
+    it.
+  </p>
+  <p>
+    The goal was to lower that barrier without lowering the quality bar, and
+    specifically without removing human judgment from the loop. This was a
+    developer-velocity problem to solve with infrastructure, not with pressure.
+  </p>
+
+  <h2>What I built</h2>
+  <p>
+    I designed and deployed a multi-agent workflow that operates on Jira tickets
+    end to end, integrated into the team's existing CI/CD pipeline and its
+    internal policy-compliance bot. It runs in production, currently processing
+    two to three tickets per week across the team.
+  </p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 740 350" role="img" aria-label="Diagram: a Jira ticket flows through a planning agent, execution agent, and review sub-agent with up to two revision cycles, then through the policy bot and a feedback distiller to a human-reviewed pull request">
+        <defs>
+          <marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.25">
+          <rect x="20" y="30" width="130" height="50" rx="4" />
+          <rect x="210" y="30" width="150" height="50" rx="4" />
+          <rect x="420" y="30" width="150" height="50" rx="4" />
+          <rect x="420" y="140" width="150" height="50" rx="4" />
+          <rect x="210" y="140" width="150" height="50" rx="4" />
+          <rect x="20" y="250" width="180" height="56" rx="4" />
+          <rect x="420" y="250" width="180" height="56" rx="4" />
+        </g>
+        <g fill="currentColor" font-size="13" text-anchor="middle">
+          <text x="85" y="60">Jira ticket</text>
+          <text x="285" y="53">Planning agent</text>
+          <text x="285" y="71" opacity="0.6">context + plan</text>
+          <text x="495" y="53">Execution agent</text>
+          <text x="495" y="71" opacity="0.6">code, tests, commits</text>
+          <text x="495" y="163">Review sub-agent</text>
+          <text x="495" y="181" opacity="0.6">≤ 2 revision cycles</text>
+          <text x="285" y="163">Policy bot</text>
+          <text x="285" y="181" opacity="0.6">static analysis gate</text>
+          <text x="110" y="273">Feedback distiller</text>
+          <text x="110" y="292" opacity="0.6">bot output → suggestions</text>
+          <text x="510" y="273">Human review</text>
+          <text x="510" y="292" opacity="0.6">final authority, no auto-merge</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.25" fill="none" marker-end="url(#arrow4)">
+          <line x1="150" y1="55" x2="204" y2="55" />
+          <line x1="360" y1="55" x2="414" y2="55" />
+          <line x1="495" y1="80" x2="495" y2="134" />
+          <line x1="414" y1="165" x2="366" y2="165" />
+          <line x1="285" y1="190" x2="285" y2="230" />
+          <path d="M 285 230 L 285 240 L 110 240 L 110 244" />
+          <line x1="200" y1="278" x2="414" y2="278" />
+        </g>
+        <g fill="currentColor" font-size="12" opacity="0.6">
+          <text x="585" y="110">review</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      Two machine review layers run before any human sees the pull request.
+    </figcaption>
+  </figure>
+
+  <p>
+    A planning agent reads the ticket and the project context and produces a
+    step-by-step plan naming the services, files, and tests involved. An
+    execution agent implements the plan, runs the test suites, and commits to a
+    feature branch. A review sub-agent then checks the diff for convention
+    adherence, missed edge cases, and potential regressions before the PR ever
+    exists, cycling back to the execution agent at most twice. The existing
+    policy bot runs its static analysis and compliance checks as always, and a
+    final distillation step translates its raw findings into actionable
+    suggestions, so the human reviewer reads "add a unit test for the
+    unauthorized-access case" instead of a rule violation ID.
+  </p>
+
+  <h2>Trade-offs</h2>
+
+  <Tradeoff decision="Two machine review layers before the human over sending agent output straight to review">
+    <span slot="bought">
+      The human reviewer's time shifts from mechanical issues (naming,
+      formatting, obvious edge cases) to architecture. Most convention-level
+      problems die before the PR is opened.
+    </span>
+    <span slot="cost">
+      Latency and compute per ticket, and the human sees curated output rather
+      than raw signal. The distillation layer has to be trustworthy, because a
+      summary that hides a real finding is worse than noise.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="A hard cap of two revision cycles over looping until the review passes clean">
+    <span slot="bought">
+      Bounded cost and no infinite revision loops. A ticket that cannot
+      converge escalates to the human with a summary of what is unresolved,
+      which is itself useful signal about the ticket.
+    </span>
+    <span slot="cost">
+      Some PRs reach the human with known open issues. That is deliberate: the
+      alternative is an agent burning unbounded cycles on a problem that
+      needed human judgment two iterations ago.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Human keeps final authority over end-to-end automation">
+    <span slot="bought">
+      Trust and adoption. Nothing merges without a human decision, so the
+      team's quality bar and accountability model stay intact, and skeptical
+      reviewers could adopt the tool without accepting new risk.
+    </span>
+    <span slot="cost">
+      A throughput ceiling: the pipeline can only move as fast as human review
+      capacity. For a platform where a bad merge means an authorization or
+      authentication defect, that ceiling is the correct price.
+    </span>
+  </Tradeoff>
+
+  <h2>Results</h2>
+  <p>
+    The honest status: the workflow is in production and deliberately early. It
+    processes two to three tickets per week, and the wins so far are observed
+    rather than benchmarked. Engineers new to the platform contribute after
+    reading a generated plan and PR instead of absorbing nine services'
+    conventions up front. Reviewers report spending their attention on
+    architecture rather than mechanics, and time from ticket assignment to
+    mergeable PR has dropped. Quantified velocity metrics are being collected
+    now; I would rather publish observed effects than invent numbers.
+  </p>
+
+  <h2>What I'd do differently</h2>
+  <p>
+    Every ticket currently gets equal agent effort, so a priority-weighted
+    scheduler is the first improvement. The second is per-service context
+    profiles: the agents learn globally, but conventions differ per service,
+    and the review layer would be sharper if each service carried its own
+    profile. Longer term, letting the planning agent read the observability
+    stack would let it flag performance implications before implementation
+    rather than in review.
+  </p>
+
+  <p class="meta">
+    Related: <a href="/work/authorization-platform/">Authorization Platform</a> ·
+    <a href="/work/authentication-platform/">Authentication Platform</a>
+  </p>
+</WorkPage>

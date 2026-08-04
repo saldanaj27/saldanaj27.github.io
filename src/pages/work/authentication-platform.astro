@@ -1,0 +1,205 @@
+---
+// Hand-authored, derived from private career notes and scrubbed per the site plan.
+// Facts come from the public resume; do not paste raw source material here.
+import WorkPage from '../../layouts/WorkPage.astro';
+import Tradeoff from '../../components/Tradeoff.astro';
+---
+
+<WorkPage
+  title="Authentication Platform"
+  oneLiner="The authentication management layer for the FICO Platform: a stateless gRPC facade over the upstream identity provider, with declarative credential provisioning."
+  role="Service owner: design, implementation, deployment, on-call"
+  timeframe="FICO Platform"
+  stack={['Spring Boot', 'gRPC', 'OAuth2/OIDC', 'Kubernetes']}
+  metrics={[
+    { value: '1M+', label: 'daily auth requests' },
+    { value: '99.98%', label: 'uptime SLA' },
+    { value: '3+', label: 'financial institutions' },
+    { value: '15+', label: 'consuming services' },
+  ]}
+  description="A stateless gRPC authentication management service for the FICO Platform, processing 1M+ daily auth requests at a 99.98% uptime SLA."
+>
+  <h2>The problem</h2>
+  <p>
+    The platform's identities ultimately live in a commercial identity provider,
+    but "just call the IdP" does not scale as an integration strategy. Without a
+    unifying layer, every platform service would integrate the IdP's REST API
+    directly: inconsistent auth patterns, credentials managed ad hoc, no unified
+    audit trail, and a hard coupling between every team's code and one vendor's
+    API surface.
+  </p>
+  <p>
+    The platform needed one contract-driven front door for authentication
+    management: client credentials, SAML and OAuth federation, tenancy, and
+    token introspection, behind stable, versioned interfaces. And because the
+    consumers are enterprise financial institutions, the layer had to hold a
+    99.98% uptime SLA and produce compliance-grade audit events, while sitting
+    on top of an upstream dependency it does not control.
+  </p>
+
+  <h2>What I built</h2>
+  <p>
+    I own this service end to end: architectural design, the Spring Boot
+    implementation, schema migrations, Helm-based deployment through GitHub
+    Actions, and production operations including on-call. Alongside the core
+    facade I designed and built a Kubernetes operator for declarative credential
+    provisioning, an annotation-driven audit and metering system that publishes
+    structured events through the platform's message bus, a configuration-driven
+    feature-flag module, and the global exception mapping between HTTP and gRPC
+    status codes.
+  </p>
+
+  <h2>How it works</h2>
+  <p>
+    The service is a stateless proxy. It holds no database: the identity
+    provider remains the single source of truth, and the service translates
+    between protobuf-defined gRPC contracts on one side and the IdP's REST API
+    on the other. Consumers get strong typing, generated clients, and a stable
+    contract; the vendor dependency is quarantined behind one boundary that can
+    evolve independently.
+  </p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 740 260" role="img" aria-label="Diagram: platform services call the stateless gRPC authentication facade, which translates to the upstream identity provider's REST API; a credentials operator and audit events hang off the facade">
+        <defs>
+          <marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+        </defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.25">
+          <rect x="20" y="40" width="160" height="70" rx="4" />
+          <rect x="270" y="30" width="200" height="90" rx="4" />
+          <rect x="560" y="40" width="160" height="70" rx="4" />
+          <rect x="270" y="180" width="200" height="56" rx="4" />
+          <rect x="20" y="180" width="160" height="56" rx="4" />
+        </g>
+        <g fill="currentColor" font-size="13" text-anchor="middle">
+          <text x="100" y="70">Platform services</text>
+          <text x="100" y="90" opacity="0.6">15+ consumers</text>
+          <text x="370" y="58">Auth facade</text>
+          <text x="370" y="78" opacity="0.75">stateless gRPC proxy</text>
+          <text x="370" y="98" opacity="0.6">no database</text>
+          <text x="640" y="70">Identity provider</text>
+          <text x="640" y="90" opacity="0.6">source of truth</text>
+          <text x="370" y="203">Credentials operator</text>
+          <text x="370" y="222" opacity="0.6">CRD → ephemeral credential</text>
+          <text x="100" y="203">Audit events</text>
+          <text x="100" y="222" opacity="0.6">via message bus</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.25" fill="none" marker-end="url(#arrow3)">
+          <line x1="180" y1="75" x2="264" y2="75" />
+          <line x1="470" y1="75" x2="554" y2="75" />
+          <line x1="370" y1="174" x2="370" y2="126" />
+          <line x1="264" y1="208" x2="186" y2="208" />
+        </g>
+        <g fill="currentColor" font-size="12" opacity="0.6">
+          <text x="195" y="65">gRPC</text>
+          <text x="490" y="65">REST</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      One boundary between the platform's contracts and the vendor's API.
+    </figcaption>
+  </figure>
+
+  <p>
+    The credentials operator extends the same declarative model I used for
+    <a href="/work/kubernetes-rbac-operator/">RBAC provisioning</a>: a team
+    declares a credential as a custom resource, and the operator reconciles it
+    into existence. The interesting design problem was least privilege. The
+    operator must create secrets in target tenants, but a standing service
+    account with cross-tenant power is exactly the credential you never want to
+    exist. Instead, each provisioning action creates a short-lived credential
+    scoped to the one target tenant, uses it, and deletes it in a
+    <code>finally</code> block, with compensating-transaction rollback if secret
+    creation fails partway.
+  </p>
+
+  <h2>Trade-offs</h2>
+
+  <Tradeoff decision="A stateless proxy with no local database over caching identity state locally">
+    <span slot="bought">
+      No dual-write consistency problem, ever. The identity provider stays the
+      single source of truth, and the service scales horizontally with nothing
+      to replicate, back up, or reconcile.
+    </span>
+    <span slot="cost">
+      Availability is coupled to the upstream. I mitigated the failure mode
+      rather than the dependency: custom gRPC health checks report NOT_SERVING
+      when the IdP is unreachable, so Kubernetes routes traffic away and the
+      service degrades explicitly instead of erroring opaquely.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="A gRPC-only API over offering REST to consumers">
+    <span slot="bought">
+      Protobuf contracts as living documentation, generated type-safe clients
+      in every consumer, and HTTP/2 multiplexing on a high-volume path.
+    </span>
+    <span slot="cost">
+      Harder ad-hoc debugging, since you cannot poke a binary API with curl,
+      and every consumer buys into gRPC tooling. Acceptable on a platform where
+      service-to-service traffic is gRPC by convention already.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Ephemeral per-operation credentials over a standing privileged service account">
+    <span slot="bought">
+      The operator never holds broad cross-tenant access. Every provisioning
+      action is scoped to one tenant and time-limited, so the worst case of a
+      leak is one narrow credential that is already scheduled for deletion.
+    </span>
+    <span slot="cost">
+      Each provisioning operation pays for credential creation and cleanup, and
+      the rollback path has to be correct: a failure between credential
+      creation and secret creation must trigger compensating cleanup or it
+      leaks the credential it just made.
+    </span>
+  </Tradeoff>
+
+  <Tradeoff decision="Aspect-oriented audit and metering annotations over explicit calls in business logic">
+    <span slot="bought">
+      Compliance-grade audit events with uniform structure, added to an
+      operation by annotating it. Business logic stays readable, and audit
+      coverage cannot drift out of style from method to method.
+    </span>
+    <span slot="cost">
+      Implicit behavior. The control flow that publishes an audit event is not
+      visible at the call site, which makes tracing and debugging genuinely
+      harder for engineers new to the codebase.
+    </span>
+  </Tradeoff>
+
+  <h2>Results</h2>
+  <ul>
+    <li>
+      The authentication foundation for the platform: 1M+ daily auth requests
+      at a 99.98% uptime SLA, consumed by 15+ internal services.
+    </li>
+    <li>
+      3+ enterprise financial institutions onboarded through its tenancy and
+      federation APIs.
+    </li>
+    <li>
+      Credential lifecycle is declarative: CRD in, scoped secret out, with
+      rollback on partial failure.
+    </li>
+  </ul>
+
+  <h2>What I'd do differently</h2>
+  <p>
+    I would build resilience against the upstream dependency in from the start,
+    circuit breakers rather than health checks alone, because the health check
+    protects the platform from the service but nothing yet smooths the service's
+    own experience of a flapping upstream. I would also write integration tests
+    against a faked IdP from day one; a proxy's correctness lives entirely at
+    its boundary, which is exactly the part unit tests cannot see.
+  </p>
+
+  <p class="meta">
+    Related: <a href="/work/authorization-platform/">Authorization Platform</a> ·
+    <a href="/work/kubernetes-rbac-operator/">Kubernetes RBAC Operator</a>
+  </p>
+</WorkPage>

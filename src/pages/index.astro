@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import MetricStrip from '../components/MetricStrip.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { work } from '../data/work';
+
+const featured = work.filter((w) => w.featured);
+const metrics = [
+  { value: '1M+', label: 'daily auth requests' },
+  { value: '99.98%', label: 'uptime SLA' },
+  { value: '30+', label: 'services consuming' },
+  { value: '2h → 8m', label: 'RBAC provisioning' },
+];
+---
+
+<Base
+  title="Javier Saldana · Platform Infrastructure Engineer"
+  description="Platform-services engineer specialized in identity and authorization infrastructure, with distributed-systems depth."
+>
+  <p class="label">Lead Software Engineer · New York, NY</p>
+  <h1>Javier Saldana</h1>
+  <p class="positioning">
+    I build identity and authorization infrastructure: the shared services, policy
+    engines, and Kubernetes operators that other engineering teams depend on. Every
+    system I have shipped professionally is a platform primitive consumed by other
+    teams. Not a product engineer; I build the layer product engineers build on.
+  </p>
+
+  <MetricStrip metrics={metrics} />
+
+  <section aria-label="Featured work" class="cards">
+    {
+      featured.map((w) => (
+        <ProjectCard
+          href={`/work/${w.slug}/`}
+          title={w.title}
+          description={w.description}
+          tags={w.tags}
+          metric={w.metric}
+        />
+      ))
+    }
+    <ProjectCard
+      href="/writing/opa-dual-sidecar-bootstrap/"
+      title="Writing: The bootstrap problem in OPA authorization"
+      description="How does an authorization system authorize itself during cold start? Why two OPA sidecars are better than one."
+      tags={['opa', 'authorization', 'pattern']}
+    />
+  </section>
+
+  <p class="meta links">
+    <a href="/Javier_Saldana_Resume.pdf">Resume (PDF)</a> ·
+    <a href="https://github.com/saldanaj27">GitHub</a> ·
+    <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a> ·
+    <a href="mailto:saldanaj27@gmail.com">saldanaj27@gmail.com</a>
+  </p>
+
+  <style>
+    .positioning {
+      font-size: 1.3125rem;
+      line-height: 1.55;
+      margin-top: 1.25rem;
+    }
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .links {
+      margin-top: 2.5rem;
+    }
+  </style>
+</Base>

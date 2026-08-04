@@ -1,0 +1,79 @@
+---
+/**
+ * The signature element: one design decision, what it bought, what it cost.
+ * Semantic dl so it reflows on mobile and reads correctly to a screen reader;
+ * tree connectors are CSS borders, not box-drawing characters.
+ */
+interface Props {
+  decision: string;
+}
+const { decision } = Astro.props;
+---
+
+<div class="tradeoff">
+  <p class="decision">{decision}</p>
+  <dl>
+    <div class="row">
+      <dt>Bought</dt>
+      <dd><slot name="bought" /></dd>
+    </div>
+    <div class="row">
+      <dt>Cost</dt>
+      <dd><slot name="cost" /></dd>
+    </div>
+  </dl>
+</div>
+
+<style>
+  .tradeoff {
+    max-width: var(--measure);
+    margin-top: 1.75rem;
+  }
+  .decision {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  dl {
+    margin: 0;
+    padding-left: 0.4rem;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0.5rem;
+    padding: 0.4rem 0 0.4rem 1.1rem;
+    border-left: 1px solid var(--rule);
+    position: relative;
+  }
+  .row:last-child {
+    border-left-color: transparent;
+  }
+  .row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0.75rem;
+    height: 1.05rem;
+    border-left: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--size-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding-top: 0.25rem;
+  }
+  dd {
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+  @media (max-width: 540px) {
+    .row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

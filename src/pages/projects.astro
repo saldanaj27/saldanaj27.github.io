@@ -4,15 +4,14 @@ import Base from '../layouts/Base.astro';
 
 <Base
   title="Side Projects · Javier Saldana"
-  description="Side projects: StatStack, an NFL analytics platform with an ML prediction pipeline, and Compass, a CLI accountability agent built on the Claude API."
+  description="StatStack: an NFL analytics platform with a machine learning prediction pipeline, built end to end."
 >
   <p class="label">Projects</p>
   <h1>Side projects</h1>
   <p>
-    Side projects are where I explore what my professional work doesn't cover:
-    machine learning, LLM agents, and full-stack product work. They are
-    deliberately secondary to the <a href="/work/">professional systems</a>, but
-    each one shipped for real.
+    Side projects are where I explore what my professional work doesn't cover.
+    They are deliberately secondary to the <a href="/work/">professional
+    systems</a>, but each one shipped for real.
   </p>
 
   <section>
@@ -50,26 +49,6 @@ import Base from '../layouts/Base.astro';
     <p class="tags">
       python · django · react · postgresql · redis · scikit-learn · docker
     </p>
-  </section>
-
-  <section>
-    <h2>Compass</h2>
-    <p class="meta">
-      <a href="https://github.com/saldanaj27/compass">github.com/saldanaj27/compass</a>
-    </p>
-    <p>
-      A CLI accountability agent built on the Anthropic Claude API. It runs
-      multi-turn goal-discovery conversations (up to five turns), then generates
-      schema-validated, deadline-aware tasks as structured JSON via tool use.
-      The design problem I found most interesting was memory: a two-layer
-      persistent context architecture separates a global user profile,
-      partitioned by life domain, from per-goal SQLite state, so check-ins are
-      personalized across sessions without re-asking questions. Daily check-ins
-      reference active goals and overdue tasks, with graceful rejection flows
-      (regenerate, discuss further, modify the goal) so a conversation never
-      dead-ends.
-    </p>
-    <p class="tags">python · anthropic claude api · sqlite · click</p>
   </section>
 
   <style>

@@ -116,26 +116,6 @@ import Base from '../layouts/Base.astro';
     </li>
   </ul>
 
-  <h3>Compass</h3>
-  <p class="meta">Python, Anthropic Claude API, SQLite, Click</p>
-  <ul>
-    <li>
-      Built a CLI accountability agent using structured tool use via the
-      Anthropic API, generating schema-validated JSON tasks with deadline
-      awareness across multi-turn discovery conversations (up to 5 turns)
-    </li>
-    <li>
-      Designed a two-layer persistent context architecture (global user profile
-      partitioned by life domain + per-goal SQLite state) enabling
-      cross-session personalization without redundant prompting
-    </li>
-    <li>
-      Implemented graceful rejection flows (regeneration, extended discussion,
-      goal modification) preventing dead-end interactions in daily
-      context-aware check-ins referencing active goals and overdue tasks
-    </li>
-  </ul>
-
   <h2>Education</h2>
   <p>
     <strong>New York University</strong> — B.S. Computer Science, Minor in Data

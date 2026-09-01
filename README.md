@@ -48,3 +48,27 @@ and excluded from the sitemap.
 `Base.astro` advertises it via `<link rel="alternate">` so feed readers
 auto-discover it. There is no visible RSS link in the UI on purpose: clicking
 it shows raw XML to the majority of visitors who do not use a feed reader.
+
+## Spotify footer
+
+The footer shows top artists from the last four weeks. It is static data, not a
+runtime API call:
+
+- `.github/workflows/spotify.yml` runs twice a day, calls
+  `scripts/fetch-spotify.mjs`, and commits `src/data/spotify.json` when it
+  changes. The commit triggers the normal deploy.
+- Credentials live only in repo secrets (`SPOTIFY_CLIENT_ID`,
+  `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`). Nothing is exposed to the
+  browser and the site stays fully static.
+- Top artists rather than "now playing" on purpose: "now playing" is empty most
+  hours and an empty widget reads as broken.
+- The fetch script never fails the build. Missing credentials or a Spotify
+  error leaves the existing data alone and exits 0. Stale music beats a broken
+  deploy. When `artists` is empty the footer strip is not rendered at all.
+
+## About page photos
+
+`public/photos/` holds the family photo deck. The About page renders it only
+when files matching `family-<n>.(jpg|png|webp)` exist, so the build never ships
+broken images. Alt text lives in `src/pages/about.astro` and should be updated
+to match the actual photos.

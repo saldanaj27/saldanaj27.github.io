@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import spotify from '../data/spotify.json';
 
 interface Props {
   title: string;
@@ -13,6 +14,9 @@ const nav = [
   { href: '/projects/', label: 'Projects' },
   { href: '/about/', label: 'About' },
 ];
+// Populated by scripts/fetch-spotify.mjs on a schedule. Empty until the
+// workflow has credentials, in which case the strip is simply not rendered.
+const artists = (spotify.artists ?? []).slice(0, 3);
 const path = Astro.url.pathname;
 const lastUpdated = new Date().toLocaleDateString('en-US', {
   year: 'numeric',
@@ -82,6 +86,19 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
           <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a> ·
           <a href="mailto:saldanaj27@gmail.com">Email</a>
         </span>
+        {
+          artists.length > 0 && (
+            <span class="meta listening">
+              <span class="listening-label">On repeat lately</span>
+              {artists.map((a, i) => (
+                <>
+                  {i > 0 && <span aria-hidden="true"> · </span>}
+                  {a.url ? <a href={a.url}>{a.name}</a> : <span>{a.name}</span>}
+                </>
+              ))}
+            </span>
+          )
+        }
         <span class="meta">Last updated {lastUpdated}</span>
       </div>
     </footer>
@@ -161,6 +178,21 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
         flex-wrap: wrap;
         padding-top: 1.25rem;
         padding-bottom: 1.5rem;
+      }
+      .listening {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .listening-label {
+        font-size: var(--size-label);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.75;
+      }
+      .listening-label::after {
+        content: ' ♫';
       }
     </style>
   </body>

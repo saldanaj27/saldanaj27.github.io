@@ -15,7 +15,7 @@ interface Props {
 const { title, oneLiner, role, timeframe, stack, metrics, description } = Astro.props;
 ---
 
-<Base title={`${title} · Javier Saldana`} description={description}>
+<Base title={`${title} · Javier Saldana`} description={description} noindex>
   <article>
     <p class="label">Work</p>
     <h1>{title}</h1>

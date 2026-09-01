@@ -6,7 +6,13 @@ export default defineConfig({
   integrations: [
     sitemap({
       // /resume/ is a compatibility redirect to the PDF, not a real page.
-      filter: (page) => !page.endsWith('/resume/'),
+      // /work/ and /writing/ are temporarily unlinked while their copy is
+      // revised; they are noindex in the meantime, so keep them out of the
+      // sitemap too. Remove the work/writing clauses to restore.
+      filter: (page) =>
+        !page.endsWith('/resume/') &&
+        !page.includes('/work/') &&
+        !page.includes('/writing/'),
     }),
   ],
   markdown: {

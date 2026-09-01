@@ -1,13 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import MetricStrip from '../components/MetricStrip.astro';
-import ProjectCard from '../components/ProjectCard.astro';
-import { work } from '../data/work';
 
-const featured = work.filter((w) => w.featured);
+// Work pages and write-ups are temporarily unlinked while their copy is
+// revised. See README ("Hidden sections").
 const metrics = [
   { value: '1M+', label: 'daily auth requests' },
-  { value: '99.98%', label: 'uptime SLA' },
   { value: '30+', label: 'services consuming' },
   { value: '2h → 8m', label: 'RBAC provisioning' },
 ];
@@ -15,43 +13,26 @@ const metrics = [
 
 <Base
   title="Javier Saldana · Platform Infrastructure Engineer"
-  description="Platform-services engineer specialized in identity and authorization infrastructure, with distributed-systems depth."
+  description="Platform engineer working on identity and authorization infrastructure, with distributed-systems depth."
 >
   <p class="label">Lead Software Engineer · New York, NY</p>
   <h1>Javier Saldana</h1>
   <p class="positioning">
-    I'm a Peruvian-American platform engineer in New York, four years into
-    building the identity and authorization layer of the FICO Platform: the
-    services, policy engines, and Kubernetes operators that other teams route a
-    million requests a day through. I like this work because shared
-    infrastructure has a particular kind of stakes. When it breaks, it breaks
-    for everyone, and your users are engineers who will tell you about it
-    immediately. That pressure is the part I actually enjoy, because it pushes
-    me toward simpler, sturdier answers than I would have settled for, and the
-    people who get them are other engineers.
+    I'm a platform engineer in New York, four years into building the identity
+    and authorization layer of the FICO Platform. I work on the services, policy
+    engines, and Kubernetes operators that other teams route a million requests
+    a day through. Shared infrastructure has a particular kind of stakes. When
+    it breaks, it breaks for everyone, and your users are engineers who will
+    tell you about it immediately. I enjoy that pressure, because it pushes me
+    toward simpler, more efficient solutions.
   </p>
 
   <MetricStrip metrics={metrics} />
 
-  <section aria-label="Featured work" class="cards">
-    {
-      featured.map((w) => (
-        <ProjectCard
-          href={`/work/${w.slug}/`}
-          title={w.title}
-          description={w.description}
-          tags={w.tags}
-          metric={w.metric}
-        />
-      ))
-    }
-    <ProjectCard
-      href="/writing/opa-dual-sidecar-bootstrap/"
-      title="Writing: The bootstrap problem in OPA authorization"
-      description="How does an authorization system authorize itself during cold start? Why two OPA sidecars are better than one."
-      tags={['opa', 'authorization', 'pattern']}
-    />
-  </section>
+  <p class="more">
+    More about how I got here and what I'm looking for on the
+    <a href="/about/">about page</a>.
+  </p>
 
   <p class="meta links">
     <a href="/Javier_Saldana_Resume.pdf">Resume (PDF)</a> ·
@@ -66,10 +47,7 @@ const metrics = [
       line-height: 1.55;
       margin-top: 1.25rem;
     }
-    .cards {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .more {
       margin-top: 2rem;
     }
     .links {

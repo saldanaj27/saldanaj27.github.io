@@ -4,165 +4,122 @@ import path from 'node:path';
 import Base from '../layouts/Base.astro';
 
 // The photo deck renders only when real images exist in public/photos/.
-// Until then the section is simply omitted, so the build never ships broken
-// <img> tags. Drop family-1/2/3.jpg (or .webp) in there and it appears.
+// Any image file in that directory is picked up, sorted by name. Alt text
+// comes from photoAlt below, matched by position; update it when the photos
+// change so the descriptions stay accurate.
 const photoDir = path.join(process.cwd(), 'public', 'photos');
 const photos = fs.existsSync(photoDir)
   ? fs
       .readdirSync(photoDir)
-      .filter((f) => /^family-\d+\.(jpe?g|png|webp)$/i.test(f))
+      .filter((f) => /\.(jpe?g|png|webp)$/i.test(f))
       .sort()
   : [];
 const photoAlt = [
   'Javier with his family',
+  'Javier with his family',
   'Rambi and Coco',
+  'Javier with his family',
   'Javier with his dogs in Los Angeles',
 ];
 ---
 
 <Base
   title="About · Javier Saldana"
-  description="Platform engineer working on identity and authorization infrastructure. How I got here, how I work, and what I do when I'm not working."
+  description="Platform engineer working on identity and authorization infrastructure. How I got here, and what I do when I'm not working."
 >
-  <p class="label">About</p>
-  <h1>About</h1>
+  <div class="page">
+    <p class="label">About</p>
+    <h1>About</h1>
 
-  <p class="meta resume-line">
-    <a href="/Javier_Saldana_Resume.pdf">Resume (PDF)</a> ·
-    <a href="https://github.com/saldanaj27">GitHub</a> ·
-    <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a> ·
-    <a href="mailto:saldanaj27@gmail.com">saldanaj27@gmail.com</a>
-  </p>
+    <p class="meta resume-line">
+      <a href="/Javier_Saldana_Resume.pdf">Resume (PDF)</a> ·
+      <a href="https://github.com/saldanaj27">GitHub</a> ·
+      <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a> ·
+      <a href="mailto:saldanaj27@gmail.com">saldanaj27@gmail.com</a>
+    </p>
 
-  <p>
-    I'm a platform engineer working on identity and authorization
-    infrastructure. Every professional system I have shipped is a shared
-    primitive consumed by other engineering teams: authentication services,
-    authorization policy distribution, Kubernetes operators with CRDs as
-    declarative APIs, a UID generation service. My users are other engineers,
-    which is the part of the job I like most.
-  </p>
+    <p>
+      I'm a platform engineer working on identity and authorization
+      infrastructure. Every professional system I have shipped is a shared
+      primitive consumed by other engineering teams, including authentication
+      services, authorization policy distribution, Kubernetes operators with
+      CRDs as declarative APIs, and a UID generation service. My users are other
+      engineers, which is the part of the job I like most.
+    </p>
 
-  <p>
-    I'm originally from Los Angeles and moved to New York for college in 2018.
-    I went in for math, because calculus was the thing I was good at and
-    reliably enjoyed, and then I found computer science and recognized it: the
-    same logic puzzles I had been doing since I was a kid, except the board was
-    infinite. That is still the pull. There is an ocean of things to learn in
-    this field, and I have never once run out of the next thing.
-  </p>
+    <h2>Outside work</h2>
 
-  <p>
-    I joined FICO's platform organization as an intern in 2021, returned full
-    time in 2022, and was promoted to Lead Software Engineer in 2026, all on the
-    same identity and access management platform. Joining a brand-new platform
-    initiative early meant I watched, and then increasingly shaped, systems
-    growing from first gRPC APIs into infrastructure serving enterprise
-    financial institutions. Lately the most interesting work has been where that
-    infrastructure meets AI: multi-agent workflows running in production CI/CD,
-    where the hard problems are the platform ones (identity, permissions,
-    orchestration, failure recovery) rather than the model ones.
-  </p>
+    <p>
+      I'm Peruvian-American, originally from Los Angeles, and moved to New York
+      for college in 2018. I'm the second in my family to go to college, after
+      an older sister who is now in residency. Home is my parents, my sister,
+      and two dogs I adore, Rambi and Coco, both past sixteen and both still in
+      Los Angeles.
+    </p>
 
-  <h2>How I work</h2>
-  <p>
-    Some patterns recur often enough across my work that I trust them as
-    descriptions rather than aspirations.
-  </p>
-  <ul>
-    <li>
-      <strong>I gravitate to zero-to-one infrastructure.</strong> Two Kubernetes
-      operators, a UID service, a feature-flag module, and two complete side
-      projects, all built from scratch. I prefer owning a service end to end
-      (design, implementation, deployment, observability, on-call) over
-      contributing features to someone else's.
-    </li>
-    <li>
-      <strong>I think in trade-offs, not solutions.</strong> Every design
-      decision names what it bought and what it cost. Stateless versus stateful,
-      eventual versus strong consistency, availability versus correctness: the
-      interesting engineering lives in what you knowingly gave up, which is why
-      every project page on this site has a trade-offs section.
-    </li>
-    <li>
-      <strong>Stateless by default.</strong> The UID service has no database,
-      the authentication facade has no database, and authorization decisions
-      run against locally cached policy. I add state only when a design forces
-      it, because state is where availability and consistency problems live.
-    </li>
-    <li>
-      <strong>I automate incident categories, not incidents.</strong> The best
-      outcome I know is making a class of failure structurally impossible: the
-      RBAC operator ended provisioning misconfigurations by making correct
-      configuration the only expressible kind.
-    </li>
-    <li>
-      <strong>I write things down.</strong> Design decisions, trade-off records,
-      honest reflections on what I'd do differently. Infrastructure work is
-      judged over years, and undocumented reasoning doesn't survive that long.
-    </li>
-  </ul>
+    {
+      photos.length > 0 && (
+        <figure class="family">
+          <div class="deck" role="group" aria-label="Family photos">
+            {photos.map((file, idx) => (
+              <img
+                src={`/photos/${file}`}
+                alt={photoAlt[idx] ?? 'Family photo'}
+                loading="lazy"
+                decoding="async"
+              />
+            ))}
+          </div>
+        </figure>
+      )
+    }
 
-  <h2>Outside work</h2>
+    <p>
+      I'm a college football fan, specifically USC. I did not go to USC. I grew
+      up in LA cheering for them, which is the whole explanation and, I'd argue,
+      enough of one.
+    </p>
 
-  <p>
-    I'm Peruvian-American and the second in my family to go to college, after an
-    older sister who is now in residency. Home is my parents, my sister, and two
-    dogs I adore: Rambi and Coco, both past sixteen, both in Los Angeles, both
-    entirely aware that their needs outrank mine.
-  </p>
+    <p>
+      Those who know me best know I spend a lot of my time playing Minesweeper.
+      It's the same appeal that pulled me into computer science, a constrained
+      board with incomplete information and a solution that yields to reasoning
+      instead of speed (though for the record, my time to beat on a 16x30 board
+      is 69.12 seconds). I also play soccer, and I'm working on running more
+      consistently.
+    </p>
 
-  {
-    photos.length > 0 && (
-      <figure class="family">
-        <div class="deck" role="group" aria-label="Family photos">
-          {photos.map((file, idx) => (
-            <img
-              src={`/photos/${file}`}
-              alt={photoAlt[idx] ?? 'Family photo'}
-              width="640"
-              height="480"
-              loading="lazy"
-              decoding="async"
-            />
-          ))}
-        </div>
-        <figcaption>The people and dogs in question.</figcaption>
-      </figure>
-    )
-  }
+    <p>
+      Fun fact, I was once a licensed scuba diver (stopped after realizing I am
+      afraid of the deep ocean).
+    </p>
 
-  <p>
-    I'm a college football fan, specifically USC. I did not go to USC. I grew up
-    in LA cheering for them, which is the whole explanation and, I'd argue,
-    enough of one.
-  </p>
+    <p>
+      Another fun fact, I've visited all seven wonders of the world with my
+      family.
+    </p>
 
-  <p>
-    Those who know me best know I spend a lot of my time playing Minesweeper. It
-    is the same appeal that pulled me into computer science: a constrained
-    board, incomplete information, and a solution that yields to reasoning
-    instead of speed (though for the record, my time to beat on a 16x30 board is
-    69.12 seconds). I also play soccer, and I'm working on running more
-    consistently.
-  </p>
-
-  <p>
-    Fun fact: I was once a licensed scuba diver (stopped after realizing I am
-    afraid of the deep ocean).
-  </p>
-
-  <h2>What I'm looking for</h2>
-  <p>
-    Platform services, distributed systems, and infrastructure that other
-    engineers build on: internal developer platforms, service meshes, policy
-    engines, orchestration, AI infrastructure. I'm most useful on teams whose
-    customers are other engineering teams, and I'm deliberately open to domains
-    beyond identity. If that sounds like your team,
-    <a href="mailto:saldanaj27@gmail.com">say hello</a>.
-  </p>
+    <h2>What I'm looking for</h2>
+    <p>
+      Platform services, distributed systems, and infrastructure that other
+      engineers build on, including internal developer platforms, orchestration,
+      and AI infrastructure. I'm most useful on teams whose customers are other
+      engineering teams, and I'm deliberately open to domains beyond identity.
+      If that sounds like your team,
+      <a href="mailto:saldanaj27@gmail.com">say hello</a>.
+    </p>
+  </div>
 
   <style>
+    /* The global wrap is wider than the reading measure, which left a much
+       bigger gutter on the right than the left. Center the measure instead. */
+    .page {
+      max-width: var(--measure);
+      margin-inline: auto;
+    }
+    .page > * + * {
+      margin-top: 1.25rem;
+    }
     .resume-line {
       margin-top: 0.5rem;
       margin-bottom: 2rem;
@@ -172,17 +129,18 @@ const photoAlt = [
        of cards being fanned. Hover or focus lifts one to the front. Degrades
        to a plain row when JS is off, and holds still under reduced motion. */
     .family {
-      max-width: var(--measure);
+      margin-top: 1.75rem;
+      margin-bottom: 1.75rem;
     }
     .deck {
       display: flex;
-      align-items: flex-end;
-      padding: 0.5rem 0 1rem;
-      min-height: 0;
+      justify-content: center;
+      align-items: center;
+      padding: 0.75rem 0;
     }
     .deck img {
-      width: clamp(9rem, 30%, 13rem);
-      aspect-ratio: 4 / 3;
+      width: clamp(6.5rem, 19%, 9.5rem);
+      aspect-ratio: 3 / 4;
       object-fit: cover;
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -192,26 +150,32 @@ const photoAlt = [
         transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1),
         box-shadow 420ms ease,
         filter 420ms ease;
-      transform-origin: bottom center;
+      transform-origin: center bottom;
       filter: saturate(0.92);
       will-change: transform;
     }
     .deck img + img {
-      margin-left: -2.75rem;
+      margin-left: -1.75rem;
     }
     .deck img:nth-child(1) {
-      rotate: -4deg;
+      rotate: -6deg;
     }
     .deck img:nth-child(2) {
-      rotate: 1.5deg;
+      rotate: -2.5deg;
     }
     .deck img:nth-child(3) {
-      rotate: 5deg;
+      rotate: 0.5deg;
+    }
+    .deck img:nth-child(4) {
+      rotate: 3deg;
+    }
+    .deck img:nth-child(5) {
+      rotate: 6.5deg;
     }
     /* The card currently in focus, set on a timer by the script below. */
     .deck img.is-front {
       z-index: 3;
-      transform: translateY(-0.5rem) scale(1.06);
+      transform: translateY(-0.5rem) scale(1.08);
       box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
       filter: saturate(1);
     }
@@ -219,7 +183,7 @@ const photoAlt = [
     .deck img:hover,
     .deck img:focus-visible {
       z-index: 4;
-      transform: translateY(-0.75rem) scale(1.09);
+      transform: translateY(-0.75rem) scale(1.11);
       box-shadow: 0 10px 28px rgb(0 0 0 / 24%);
       filter: saturate(1);
     }
@@ -232,9 +196,9 @@ const photoAlt = [
         transition: none;
       }
     }
-    @media (max-width: 30rem) {
+    @media (max-width: 34rem) {
       .deck img + img {
-        margin-left: -1.75rem;
+        margin-left: -1.25rem;
       }
     }
   </style>

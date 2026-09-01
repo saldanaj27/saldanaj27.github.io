@@ -24,5 +24,15 @@ via GitHub Actions on every push to `main`.
 
 ## Resume
 
-`public/Javier_Saldana_Resume.pdf` and `src/pages/resume.astro` mirror each
-other. When the resume changes, update both together.
+`public/Javier_Saldana_Resume.pdf` is the only resume artifact on the site. It
+mirrors the canonical section of `career/resume/resume_master.md`; when the
+resume changes, update both together. There is deliberately no HTML resume
+page: the work pages carry the substance and the PDF is linked from the home
+page and About.
+
+## RSS
+
+`src/pages/writing/rss.xml.js` publishes a feed at `/writing/rss.xml`, and
+`Base.astro` advertises it via `<link rel="alternate">` so feed readers
+auto-discover it. There is no visible RSS link in the UI on purpose: clicking
+it shows raw XML to the majority of visitors who do not use a feed reader.

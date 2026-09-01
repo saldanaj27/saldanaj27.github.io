@@ -12,7 +12,6 @@ const nav = [
   { href: '/writing/', label: 'Writing' },
   { href: '/projects/', label: 'Projects' },
   { href: '/about/', label: 'About' },
-  { href: '/resume/', label: 'Resume' },
 ];
 const path = Astro.url.pathname;
 const lastUpdated = new Date().toLocaleDateString('en-US', {
@@ -81,8 +80,7 @@ const lastUpdated = new Date().toLocaleDateString('en-US', {
         <span class="meta">
           <a href="https://github.com/saldanaj27">GitHub</a> ·
           <a href="https://linkedin.com/in/javier-saldana27">LinkedIn</a> ·
-          <a href="mailto:saldanaj27@gmail.com">Email</a> ·
-          <a href="/writing/rss.xml">RSS</a>
+          <a href="mailto:saldanaj27@gmail.com">Email</a>
         </span>
         <span class="meta">Last updated {lastUpdated}</span>
       </div>

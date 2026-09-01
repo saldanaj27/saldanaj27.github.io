@@ -6,23 +6,21 @@ tags: ['opa', 'authorization', 'kubernetes', 'patterns']
 order: 1
 ---
 
-<!-- Derived by hand from a private career-notes draft. Scrubbed per the site plan. Do not paste raw source. -->
-
 *An infrastructure pattern for decentralized authorization that can authorize itself during cold start.*
 
 ## The problem
 
-At FICO, we built a multi-tenant, policy-based authorization platform around [Open Policy Agent (OPA)](https://www.openpolicyagent.org/). Any platform service adds a shared client library and gets sub-millisecond, decentralized authorization by calling its local OPA sidecar at `localhost:8181/v1/data/rbac/allow`.
+The setup: a multi-tenant, policy-based authorization platform built around [Open Policy Agent (OPA)](https://www.openpolicyagent.org/). Any service adds a shared client library and gets sub-millisecond, decentralized authorization by calling its local OPA sidecar. No network hop to a central authorization server, no shared failure domain.
 
-But there's a fundamental chicken-and-egg problem: **how does the authorization system authorize its own operations during cold start?**
+That design has a chicken-and-egg problem hiding in it: **how does the authorization system authorize its own operations during cold start?**
 
-When a new service starts up, its OPA sidecar has no bundle loaded yet. The bundle is fetched from a bundle-delivery service, which itself requires authorization to access. The service can't make its first authorized request until the first bundle is loaded, but it can't load the bundle without making an authorized request. Deadlock.
+When a new service starts up, its OPA sidecar has no bundle loaded yet. The bundle is fetched from a bundle-delivery service, which itself requires authorization to access. The service cannot make its first authorized request until the first bundle is loaded, and it cannot load the bundle without making an authorized request. Deadlock.
 
-This is the **authorization bootstrap problem**, and it's not just theoretical. We saw cold-start authorization failures during deployments and pod restarts before solving it.
+This is the **authorization bootstrap problem**. It is easy to miss on a whiteboard, because on a whiteboard every component is already running.
 
 ## The solution: dual OPA sidecar
 
-We solved this with a **dual OPA sidecar pattern**: two OPA containers per pod, with OR logic for authorization decisions.
+The fix is a **dual OPA sidecar pattern**: two OPA containers per pod, with OR logic for authorization decisions.
 
 ```
 OpaClient.allow(action, resourceId)
@@ -79,7 +77,7 @@ The overriding question for all three: **do you have an independent, faster revo
 
 2. **Init container that pre-loads the bundle**: Would block pod startup until the bundle is fetched. Same availability problem as the startup gate, plus the init container would need its own authorization to fetch from the bundle service, so the bootstrap problem recurs.
 
-3. **Centralized auth server**: An earlier design considered calling a central authorization service over the network. We rejected this for the same reason we reject it for all platform auth: the network dependency, the latency, and the single-point-of-failure risk. The dual-sidecar pattern is the same decentralized philosophy applied to the bootstrap problem.
+3. **Centralized auth server**: Call a central authorization service over the network at startup. This is the option that gets suggested most often, and it does solve the deadlock. It also gives back exactly what sidecar-based authorization was adopted to get: no network dependency on the request path, no added latency, no single point of failure shared by every service. The dual-sidecar pattern is the same decentralized philosophy applied to the bootstrap problem rather than abandoned at it.
 
 ## Implementation details
 
@@ -143,13 +141,13 @@ public boolean allow(String action, String resourceId) {
 - Systems with real-time revocation requirements (stock trading platforms, financial transaction processing)
 - Environments without a fast, reliable kill switch (JWT timeout, service-level block) to cover the bootstrap window
 
-## Measurable impact
+## What the pattern buys
 
-After deploying the dual-OPA pattern across the platform:
+What you get for one extra container:
 
-- **Cold-start failures dropped to zero.** No more authorization errors during pod startup.
-- **No measurable performance impact.** The OR query adds ~1ms overhead: a single extra loopback HTTP call when the primary fails, which is rare after bundle load.
-- **Bundle propagation unchanged.** Live bundle polling and propagation behavior is identical; the bootstrapped OPA is purely a cold-start safety net.
+- **The bootstrap deadlock is structurally gone.** A pod can always answer an authorization question, because at least one of its two policy sources is guaranteed to have data at startup. The failure mode is not made less likely, it is made unreachable.
+- **Negligible latency cost.** The fallback adds roughly a millisecond: one extra loopback HTTP call, and only on the path where the primary returns false. After bundle load, that path is rare.
+- **No change to steady-state behavior.** Live bundle polling and propagation work exactly as before. The bootstrapped OPA is purely a cold-start safety net and does nothing once the primary is warm.
 
 ## Key takeaway
 
@@ -159,4 +157,4 @@ The core insight: **in distributed systems, the bootstrapping path is often the 
 
 ---
 
-*This pattern was implemented as part of the authorization platform at FICO. The OPA bundle distribution architecture was a team-level design; the dual-sidecar bootstrap pattern was my contribution.*
+*This pattern comes out of production work on a multi-tenant authorization platform. The write-up is deliberately generic: no employer systems, identifiers, or internal architecture. If you want to talk about the specifics, [email me](mailto:saldanaj27@gmail.com).*

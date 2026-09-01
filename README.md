@@ -15,10 +15,20 @@ via GitHub Actions on every push to `main`.
   from private source notes but never generated or synced from them. Do not
   paste raw source material into this repo.
 - Every page derived from professional work was scrubbed for internal
-  identifiers before publishing. `scripts/scrub-check.sh` greps the built
-  output for a blocklist and fails the build on any hit; it runs in CI on every
-  deploy. If you add content about professional work, keep it at the pattern
-  level: public tooling names and public resume metrics only.
+  identifiers before publishing. `scripts/scrub-check.sh` enforces two gates on
+  every build and in CI:
+  1. **Blocklist.** Internal service names, infra identifiers, vendor names,
+     colleagues, and ticket IDs must not appear anywhere in the built output.
+  2. **Attribution.** Write-ups under `src/content/writing/` must not name the
+     employer at all. Work pages and the resume name FICO deliberately, because
+     they describe a job. Write-ups describe architecture and failure modes, and
+     attributing those to a named employer publishes that employer's engineering
+     design. Keep write-ups at the pattern level; the work pages carry the
+     named, attributed proof.
+
+  If you add content about professional work, keep it at the pattern level:
+  public tooling names and public resume metrics only. Never publish a specific
+  production failure, incident, or outage, attributed or not.
 - Voice: first person, past tense, concrete numbers, trade-offs stated. No
   em-dashes.
 

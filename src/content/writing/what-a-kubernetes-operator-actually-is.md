@@ -6,8 +6,6 @@ tags: ['kubernetes', 'operators', 'infrastructure']
 order: 2
 ---
 
-<!-- Derived by hand from private career notes (authz narrative, sections 2 and 3d). Scrubbed per the site plan. Do not paste raw source. -->
-
 Most explanations of Kubernetes operators start with the vocabulary: custom resource definitions, controllers, reconcilers, informers. That's backwards. The vocabulary describes the machinery, and the machinery only makes sense once you understand the one idea it exists to serve.
 
 Here is the idea: **an operator is a thermostat.**

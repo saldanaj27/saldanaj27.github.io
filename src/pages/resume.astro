@@ -1,0 +1,25 @@
+---
+// Compatibility redirect only. The HTML resume page was removed in favor of
+// the PDF as the single resume artifact (see README). This exists so older
+// links to /resume/ land on the PDF instead of a 404. Deliberately not in the
+// site nav and marked noindex so it does not compete with real pages.
+const target = '/Javier_Saldana_Resume.pdf';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resume · Javier Saldana</title>
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={new URL(target, Astro.site)} />
+  </head>
+  <body>
+    <p>
+      The resume now lives as a PDF. If you are not redirected automatically,
+      <a href={target}>download it here</a>.
+    </p>
+  </body>
+</html>

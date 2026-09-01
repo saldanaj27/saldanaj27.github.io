@@ -28,7 +28,9 @@ via GitHub Actions on every push to `main`.
 mirrors the canonical section of `career/resume/resume_master.md`; when the
 resume changes, update both together. There is deliberately no HTML resume
 page: the work pages carry the substance and the PDF is linked from the home
-page and About.
+page and About. `src/pages/resume.astro` is a compatibility redirect only, kept
+so older links to `/resume/` reach the PDF instead of a 404. It is `noindex`
+and excluded from the sitemap.
 
 ## RSS
 
